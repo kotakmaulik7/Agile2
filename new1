@@ -1,0 +1,109 @@
+<%@ page import="javax.servlet.*" %>
+<%@ page import="javax.servlet.http.*" %>
+<%@ page import="java.sql.*" %>
+<html>
+	<head>
+		<link rel="shortcut icon" href="images/favicon.png">
+		<link rel="stylesheet" href="css/style.css">
+		<title>Leave Management System</title>
+	</head>
+	<body class="bg">
+		<div class="overlay">
+			<img class="logo" src="images/logo.png">
+                        <form method="post"><div class="login-form">
+				<font size="+3.5"><center style="margin-bottom:50px;">Log In</font></center>
+				Username<br>
+                                <input class="input" type="text" name="uname" placeholder="Eg.John98">
+				<br><br>Password<br>
+                                <input class="input" type="password" name="pass" placeholder="********"><br><br>
+                                <input type="submit" class="btn" name="submit" value="Login"><br><br><br>
+				<center>
+					<a href="forgot_pass.jsp">Forgot Password?</a>
+				</center>
+                        </form></div>
+		</div>
+	</body>
+</html>
+<%
+    session.setAttribute("eid", null);
+        String url = "jdbc:mysql://localhost:3306/lms";
+        String user = "root";
+        String password = "";
+        Connection myConn = null;
+        Statement myStmt = null;
+
+        Class.forName("com.mysql.jdbc.Driver"); 
+        
+       try {
+            
+            myConn = DriverManager.getConnection(url, user, password);
+            myStmt = myConn.createStatement();
+            
+            String uname=request.getParameter("uname");
+            String pass=request.getParameter("pass");
+            String submit=request.getParameter("submit");
+            
+            String sql = "select emp_id,pwd,designation from emp where emp_id='"+uname+"' and pwd='"+pass+"'";
+            
+            ResultSet result=myStmt.executeQuery(sql);;
+            if(submit.equals("Login"))
+                {
+                     if(result.next())
+                     {
+                         if(result.getString(3).equals("admin")) {
+                             session.setAttribute("eid", uname);  
+                             response.sendRedirect("manage_users.jsp");
+                         }
+                         else if(result.getString(3).equals("Head of Department"))
+                         {
+                             session.setAttribute("eid", uname);
+                             response.sendRedirect("leave_requests.jsp");
+                         }
+                         else if(result.getString(3).equals("Director"))
+                         {
+                             session.setAttribute("eid", uname);
+                             response.sendRedirect("leave_requests_dir.jsp");
+                         }
+                         else {
+                           session.setAttribute("eid", uname);
+                             response.sendRedirect("emp_apply.jsp");
+                           
+
+                         }
+                      
+                     }
+                     else
+                     {
+                         out.println("<script> alert('Invalid Email Or Password') </script>");
+
+                     }
+                }
+       }
+       
+           
+   
+        catch (SQLException exc) {
+            exc.printStackTrace();
+        } 
+        catch (Exception exc) {
+            exc.printStackTrace();
+            } 
+        finally {
+            if (myStmt != null) {
+                try {
+                    myStmt.close();
+                } catch (SQLException ex) {
+                      }
+            }
+
+            if (myConn != null) {
+                try {
+                    myConn.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+  
+   
+    
+%>
